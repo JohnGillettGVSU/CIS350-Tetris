@@ -2,10 +2,11 @@ import java.awt.*;
 
 import java.awt.event.*;
 import java.io.IOException;
+import java.util.Random;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.*;
 
-public class MainMenu extends JFrame implements ActionListener {
+public class MainMenu extends JPanel implements ActionListener {
     private JFrame f;
     private Sound menuMusic;
 
@@ -28,12 +29,27 @@ public class MainMenu extends JFrame implements ActionListener {
 
     private JSlider volume;
 
+    //Needed to use graphics methods
+    private Graphics g;
 
     private Icon bgImage;
     private JLabel background;
+    private JLabel title;
 
     //Default Difficulty is Medium, or 2
     private int diffChoice = 2;
+
+    //Array holding tetris pieces that are on the board or next in line
+    private TetrisPiece[] pieces;
+
+    //timer for the game cycle
+    private Timer timer;
+
+    //flags
+    private boolean isFalling = false;
+
+    //board array
+    private boolean[][] board;
 
 
     private MainMenu() throws IOException, UnsupportedAudioFileException {
@@ -47,7 +63,7 @@ public class MainMenu extends JFrame implements ActionListener {
         f.setBackground(Color.black);
 
         Icon titleCard = new ImageIcon("src/Resources/Images/titlecard.png");
-        JLabel title = new JLabel(titleCard);
+        title = new JLabel(titleCard);
         title.setBounds(75,0,250,200);
 
         //JPanel Background
@@ -119,6 +135,12 @@ public class MainMenu extends JFrame implements ActionListener {
         muteButton.setForeground( new Color(255, 9, 7) );
         muteButton.setBorderPainted(false);
 
+        //Create array of tetris pieces
+        pieces = new TetrisPiece[7];
+        board = new boolean[10][22];
+        boardInit();
+
+
 //        volume.addChangeListener(this);
 //
 //        public void stateChanged(ChangeEvent e) {
@@ -167,6 +189,237 @@ public class MainMenu extends JFrame implements ActionListener {
         muteButton.addActionListener(this);
 
         f.setVisible(true);
+
+        //Array that holds each tetris piece. slot 0 holds active piece,
+        //slot 1 holds next piece, slot 2 piece after that, etc
+        pieces = new TetrisPiece[7];
+        fillPieces();
+    }
+
+    private void boardInit(){
+        for(int x = 0; x <= 9; ++x){
+            for(int y = 0; y <= 21; y++){
+                board[x][y] = false;
+            }
+        }
+    }
+
+    private void updateBoard(){
+        for(int i = 0; i <= 3; ++i) {
+            //set each square of the board where a piece lands to true
+            board[pieces[0].getPosition(i, 0)][pieces[0].getPosition(i, 1)] = true;
+        }
+    }
+
+    public void paintComponent(Graphics g){
+        super.paintComponent(g);
+        drawTetrisGrid(g);
+        drawPiece(g);
+        clearLines();
+        //doDrawing(g);
+    }
+
+    private void drawTetrisGrid(Graphics g){
+        g.setColor(Color.LIGHT_GRAY);
+        //draw vertical lines
+        for(int x = 50; x < 300; x += 25){
+            for(int y = 60; y < 560; y += 25){
+                g.drawRect(x, y, 25, 25);
+            }
+        }
+    }
+
+    private void drawPiece(Graphics g){
+        g.setColor(Color.BLUE);
+        for(int i = 0; i <= 3; ++i){
+            g.fillRect(pieces[0].getPosition(i,0)*25+51,
+                    600 - (pieces[0].getPosition(i,1)*25+64),23,23);
+        }
+        for(int x = 0; x <= 9; ++x){
+            for(int y = 0; y <= 21; y++){
+                if(board[x][y]){
+                    g.fillRect(x * 25 + 51, 600 - (y * 25 + 64), 23, 23);
+                }
+            }
+        }
+    }
+
+    private void movePieces(){
+        for(int i = 0; i <= 5; ++i){
+            pieces[i] = pieces[i+1];
+        }
+        Random rand = new Random();
+        createNewPiece(6);
+    }
+
+    private void createNewPiece(int i){
+        Random rand = new Random();
+        int r;
+        r = rand.nextInt(7);
+        if(r == 0){
+            pieces[i] = new TetrisPiece("linePiece");
+        }
+        else if(r == 1){
+            pieces[i] = new TetrisPiece("squarePiece");
+        }
+        else if(r == 2){
+            pieces[i] = new TetrisPiece("T_Piece");
+        }
+        else if(r == 3){
+            pieces[i] = new TetrisPiece("Z_Piece");
+        }
+        else if(r == 4){
+            pieces[i] = new TetrisPiece("S_Piece");
+        }
+        else if(r == 5){
+            pieces[i] = new TetrisPiece("L_Piece");
+        }
+        else if(r == 6){
+            pieces[i] = new TetrisPiece("mirroredL_Piece");
+        }
+    }
+
+    private void fillPieces(){
+        for(int i = 0; i <= 6; ++i){
+            createNewPiece(i);
+        }
+    }
+
+    private void tryMovePieceDown(){
+        int curX, curY;
+        for(int i = 0; i <= 3; ++i) {
+            curX = pieces[0].getPosition(i, 0);
+            curY = pieces[0].getPosition(i, 1);
+            if (curY == 0 || board[curX][curY - 1]){
+                updateBoard();
+                movePieces();
+                return;
+            }
+        }
+        pieces[0].downOneLine();
+    }
+
+    private void tryMoveLeft(){
+        int curX;
+        int curY;
+
+        //check to make sure piece isn't at left edge
+        for(int x = 0; x <= 3; ++x) {
+            curX = pieces[0].getPosition(x, 0);
+            if (curX == 0){
+                return;
+            }
+        }
+
+        //check to make sure there isn't another piece in the way
+        for(int x = 0; x <= 3; ++x) {
+            curX = pieces[0].getPosition(x, 0);
+            curY = pieces[0].getPosition(x, 1);
+            if (board[curX - 1][curY]){
+                return;
+            }
+        }
+
+        //move each square of the piece after making sure it can be moved
+        for(int x = 0; x <= 3; ++x) {
+            curX = pieces[0].getPosition(x, 0);
+            pieces[0].setPosition(x, 0, curX - 1);
+        }
+    }
+
+    private void tryMoveRight(){
+        int curX;
+        int curY;
+
+        //check to make sure piece isn't at right edge
+        for(int x = 0; x <= 3; ++x) {
+            curX = pieces[0].getPosition(x, 0);
+            if (curX == 9){
+                return;
+            }
+        }
+
+        //check to make sure there isn't another piece in the way
+        for(int x = 0; x <= 3; ++x) {
+            curX = pieces[0].getPosition(x, 0);
+            curY = pieces[0].getPosition(x, 1);
+            if (board[curX + 1][curY]){
+                return;
+            }
+        }
+
+        //move each square of the piece after making sure it can be moved
+        for(int x = 0; x <= 3; ++x) {
+            curX = pieces[0].getPosition(x, 0);
+            pieces[0].setPosition(x, 0, curX + 1);
+        }
+    }
+
+    private void tryMoveDown(){
+        int curX;
+        int curY;
+
+        //check to make sure piece isn't at bottom edge
+        for(int x = 0; x <= 3; ++x) {
+            curY = pieces[0].getPosition(x, 1);
+            if (curY == 0){
+                return;
+            }
+        }
+
+        //check to make sure there isn't another piece in the way
+        for(int x = 0; x <= 3; ++x) {
+            curX = pieces[0].getPosition(x, 0);
+            curY = pieces[0].getPosition(x, 1);
+            if (board[curX][curY - 1]){
+                return;
+            }
+        }
+
+        //move each square of the piece after making sure it can be moved
+        for(int x = 0; x <= 3; ++x) {
+            curY = pieces[0].getPosition(x, 1);
+            pieces[0].setPosition(x, 1, curY - 1);
+        }
+    }
+
+    private void clearLines(){
+        boolean clear;
+        for(int y = 21; y >= 0; --y){
+            clear = true;
+            for(int x = 0; x <= 9; x++){
+                if(!board[x][y]){
+                    clear = false;
+                    break;
+                }
+            }
+            if(clear){
+                moveDown(y);
+                repaint();
+            }
+        }
+    }
+
+    private void moveDown(int stop){
+        for(int y = stop; y < 21; ++y){
+            for(int x = 0; x <= 9; ++x){
+                board[x][y] = board[x][y+1];
+            }
+        }
+    }
+
+    private void rotateLeft(){
+        if(pieces[0].getName().equals("squarePiece")){
+            return;
+        }
+        //do stuff to make piece rotate
+    }
+
+    private void rotateRight(){
+        if(pieces[0].getName().equals("squarePiece")){
+            return;
+        }
+        //do stuff to make piece rotate
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -181,6 +434,19 @@ public class MainMenu extends JFrame implements ActionListener {
             /**PLACEHOLDER**/
             //Start game with assigned difficulty
             //startGame(diffChoice)
+            background.setIcon(null);
+            f.remove(title);
+            f.remove(startButton);
+            f.remove(diffButton);
+            f.remove(credButton);
+            f.remove(quitButton);
+            repaint();
+            f.setContentPane(this);
+            timer = new Timer(300, new GameCycle());
+            timer.start();
+            //setFocusable(true);
+            addKeyListener(new TAdapter());
+            requestFocus();
 
             try {
                 menuMusic.stopSound();
@@ -212,7 +478,7 @@ public class MainMenu extends JFrame implements ActionListener {
             //Set Difficulty to Easy, or Value 1
             diffChoice = 1;
 
-            //This Code Changes the Background Image to East Mode Image
+            //This Code Changes the Background Image to Easy Mode Image
             bgImage = new ImageIcon("src/Resources/Images/vaporTrainTrimmed.gif");
             background.setIcon(bgImage);
             background.validate();
@@ -314,6 +580,49 @@ public class MainMenu extends JFrame implements ActionListener {
 //
 //        }
 //    }
+
+    private class GameCycle implements ActionListener {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+            isFalling = true;
+            nextCycle();
+            repaint();
+        }
+    }
+
+    class TAdapter extends KeyAdapter {
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+            int keycode = e.getKeyCode();
+            if(keycode == KeyEvent.VK_LEFT) {
+                tryMoveLeft();
+            }
+            else if(keycode == KeyEvent.VK_RIGHT) {
+                tryMoveRight();
+            }
+            else if(keycode == KeyEvent.VK_DOWN) {
+                tryMoveDown();
+            }
+            else if(keycode == KeyEvent.VK_Z) {
+                rotateLeft();
+            }
+            else if(keycode == KeyEvent.VK_X) {
+                rotateRight();
+            }
+            repaint();
+        }
+    }
+
+    private void nextCycle(){
+        if(isFalling){
+            isFalling = false;
+            tryMovePieceDown();
+        }
+    }
+
 
     public static void main(String args[]) throws IOException, UnsupportedAudioFileException {
         new MainMenu();
