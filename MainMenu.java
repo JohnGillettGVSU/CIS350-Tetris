@@ -6,9 +6,13 @@ import java.util.Random;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.*;
 
-public class MainMenu extends JPanel implements ActionListener {
+public class MainMenu extends JPanel implements ActionListener, MouseListener {
     private JFrame f;
     private Sound menuMusic;
+
+    /**LOOK HERE FIXME**/
+
+    private JLabel title;
 
     //Main Menu Buttons
     private JButton startButton;
@@ -27,14 +31,31 @@ public class MainMenu extends JPanel implements ActionListener {
     private Icon muteIcon;
     private Icon unmuteIcon;
 
-    private JSlider volume;
 
-    //Needed to use graphics methods
-    private Graphics g;
-
+    //Declare Background Image Icon
     private Icon bgImage;
+
+    //Declare Main Menu Icons
+    private Icon startIcon;
+    private Icon startIconGlow;
+    private Icon diffIcon;
+    private Icon diffIconGlow;
+    private Icon credIcon;
+    private Icon credIconGlow;
+    private Icon quitIcon;
+    private Icon quitIconGlow;
+
+    //Declare Difficulty Menu Icons
+    private Icon easyIcon;
+    private Icon easyIconGlow;
+    private Icon medIcon;
+    private Icon medIconGlow;
+    private Icon hardIcon;
+    private Icon hardIconGlow;
+    private Icon backIcon;
+    private Icon backIconGlow;
+
     private JLabel background;
-    private JLabel title;
 
     //Default Difficulty is Medium, or 2
     private int diffChoice = 2;
@@ -52,7 +73,7 @@ public class MainMenu extends JPanel implements ActionListener {
     private boolean[][] board;
 
 
-    private MainMenu() throws IOException, UnsupportedAudioFileException {
+    private MainMenu() throws IOException, UnsupportedAudioFileException  {
         menuMusic = new Sound();
         menuMusic.playSound(1);
 
@@ -75,56 +96,78 @@ public class MainMenu extends JPanel implements ActionListener {
         JMenuBar jmb = new JMenuBar();
 
         //Starts game with default normal difficulty
-        startButton = new JButton("START");
-        startButton.setBounds(100,200,200,30);
-        startButton.setBackground( new Color( 0, 0, 0, 200 ) );
-        startButton.setForeground( new Color(255, 175, 20) );
+        startIcon = new ImageIcon("src/Resources/Images/start.png");
+        startIconGlow = new ImageIcon("src/Resources/Images/startglow.png");
+        startButton = new JButton();
+        startButton.setBounds(100,200,200,40);
+        startButton.setIcon(startIcon);
+        startButton.setBorderPainted(false);
+        startButton.setBackground( new Color( 0, 0, 0, 0 ) );
 
         //Takes user to difficulty selection pane
-        diffButton = new JButton("DIFFICULTY");
-        diffButton.setBounds(100,250,200,30);
-        diffButton.setBackground( new Color( 0, 0, 0, 200 ) );
-        diffButton.setForeground( new Color(255, 42, 134) );
+        diffIcon = new ImageIcon("src/Resources/Images/difficulty.png");
+        diffIconGlow = new ImageIcon("src/Resources/Images/difficultyglow.png");
+        diffButton = new JButton();
+        diffButton.setBounds(100,250,200,40);
+        diffButton.setIcon(diffIcon);
+        diffButton.setBorderPainted(false);
+        diffButton.setBackground( new Color( 0, 0, 0, 0 ) );
 
         //Displays game credits
-        credButton = new JButton("CREDITS");
-        credButton.setBounds(100,300,200,30);
-        credButton.setBackground( new Color( 0, 0, 0, 200 ) );
-        credButton.setForeground( new Color(255, 17, 69) );
+        credIcon = new ImageIcon("src/Resources/Images/credits.png");
+        credIconGlow = new ImageIcon("src/Resources/Images/creditsglow.png");
+        credButton = new JButton();
+        credButton.setBounds(100,300,200,40);
+        credButton.setIcon(credIcon);
+        credButton.setBorderPainted(false);
+        credButton.setBackground( new Color( 0, 0, 0, 0 ) );
 
         //Exits game
-        quitButton = new JButton("QUIT");
-        quitButton.setBounds(100,350,200,30);
-        quitButton.setBackground( new Color( 0, 0, 0, 200 ) );
-        quitButton.setForeground( new Color(255, 9, 7) );
+        quitIcon = new ImageIcon("src/Resources/Images/quit.png");
+        quitIconGlow = new ImageIcon("src/Resources/Images/quitglow.png");
+        quitButton = new JButton();
+        quitButton.setBounds(100,350,200,40);
+        quitButton.setIcon(quitIcon);
+        quitButton.setBorderPainted(false);
+        quitButton.setBackground( new Color( 0, 0, 0, 0 ) );
 
 
         //Draws Difficulty Menu
+        easyIcon = new ImageIcon("src/Resources/Images/easy.png");
+        easyIconGlow = new ImageIcon("src/Resources/Images/easyglow.png");
+        easyButton = new JButton();
+        easyButton.setBounds(100,200,200,40);
+        easyButton.setIcon(easyIcon);
+        easyButton.setBorderPainted(false);
+        easyButton.setBackground( new Color( 0, 0, 0, 0 ) );
 
-        easyButton = new JButton("EASY");
-        easyButton.setBounds(100,200,200,30);
-        easyButton.setBackground( new Color( 0, 0, 0, 200 ) );
-        easyButton.setForeground( new Color(255, 175, 20) );
+        medIcon = new ImageIcon("src/Resources/Images/medium.png");
+        medIconGlow = new ImageIcon("src/Resources/Images/mediumglow.png");
+        medButton = new JButton();
+        medButton.setBounds(100,250,200,40);
+        medButton.setIcon(medIcon);
+        medButton.setBorderPainted(false);
+        medButton.setBackground( new Color( 0, 0, 0, 0 ) );
 
-        medButton = new JButton("MEDIUM");
-        medButton.setBounds(100,250,200,30);
-        medButton.setBackground( new Color( 0, 0, 0, 200 ) );
-        medButton.setForeground( new Color(255, 42, 134) );
+        hardIcon = new ImageIcon("src/Resources/Images/hard.png");
+        hardIconGlow = new ImageIcon("src/Resources/Images/hardglow.png");
+        hardButton = new JButton();
+        hardButton.setBounds(100,300,200,40);
+        hardButton.setIcon(hardIcon);
+        hardButton.setBorderPainted(false);
+        hardButton.setBackground( new Color( 0, 0, 0, 0 ) );
 
-        hardButton = new JButton("HARD");
-        hardButton.setBounds(100,300,200,30);
-        hardButton.setBackground( new Color( 0, 0, 0, 200 ) );
-        hardButton.setForeground( new Color(255, 17, 69) );
-
-        backButton = new JButton("BACK");
-        backButton.setBounds(100,350,200,30);
-        backButton.setBackground( new Color( 0, 0, 0, 200 ) );
-        backButton.setForeground( new Color(255, 9, 7) );
+        backIcon = new ImageIcon("src/Resources/Images/back.png");
+        backIconGlow = new ImageIcon("src/Resources/Images/backglow.png");
+        backButton = new JButton();
+        backButton.setBounds(100,350,200,40);
+        backButton.setIcon(backIcon);
+        backButton.setBorderPainted(false);
+        backButton.setBackground( new Color( 0, 0, 0, 0 ) );
 
         //Draws Audio Buttons
 
         muteButton = new JButton();
-        volume = new JSlider(JSlider.VERTICAL,100);
 
         muteIcon = new ImageIcon("src/Resources/Images/muteButton.png");
         unmuteIcon = new ImageIcon("src/Resources/Images/unmuteButton.png");
@@ -135,28 +178,10 @@ public class MainMenu extends JPanel implements ActionListener {
         muteButton.setForeground( new Color(255, 9, 7) );
         muteButton.setBorderPainted(false);
 
-        //Create array of tetris pieces
         pieces = new TetrisPiece[7];
         board = new boolean[10][22];
         boardInit();
 
-
-//        volume.addChangeListener(this);
-//
-//        public void stateChanged(ChangeEvent e) {
-//            JSlider source = (JSlider)e.getSource();
-//            if (!source.getValueIsAdjusting()) {
-//                int fps = (int)source.getValue();
-//                if (fps == 0) {
-//                    if (!frozen) stopAnimation();
-//                } else {
-//                    delay = 1000 / fps;
-//                    timer.setDelay(delay);
-//                    timer.setInitialDelay(delay * 10);
-//                    if (frozen) startAnimation();
-//                }
-//            }
-//        }
 
         //Adds Main Menu Buttons
         f.add(startButton);
@@ -175,23 +200,116 @@ public class MainMenu extends JPanel implements ActionListener {
 
         //Main Menu Action Listeners
         startButton.addActionListener(this);
+        startButton.addMouseListener(this);
+        startButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent mouseEvent) {
+                startButton.setIcon(startIconGlow);
+            }
+            @Override
+            public void mouseExited(MouseEvent mouseEvent){
+                startButton.setIcon(startIcon);
+            }
+        });
+
         diffButton.addActionListener(this);
+        diffButton.addMouseListener(this);
+        diffButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent mouseEvent) {
+                diffButton.setIcon(diffIconGlow);
+            }
+            @Override
+            public void mouseExited(MouseEvent mouseEvent){
+                diffButton.setIcon(diffIcon);
+            }
+        });
+
         credButton.addActionListener(this);
+        credButton.addMouseListener(this);
+        credButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent mouseEvent) {
+                credButton.setIcon(credIconGlow);
+            }
+            @Override
+            public void mouseExited(MouseEvent mouseEvent){
+                credButton.setIcon(credIcon);
+            }
+        });
+
         quitButton.addActionListener(this);
+        quitButton.addMouseListener(this);
+        quitButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent mouseEvent) {
+                quitButton.setIcon(quitIconGlow);
+            }
+            @Override
+            public void mouseExited(MouseEvent mouseEvent){
+                quitButton.setIcon(quitIcon);
+            }
+        });
 
         //Difficulty Menu Action Listeners
         easyButton.addActionListener(this);
+        easyButton.addMouseListener(this);
+        easyButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent mouseEvent) {
+                easyButton.setIcon(easyIconGlow);
+            }
+            @Override
+            public void mouseExited(MouseEvent mouseEvent){
+                easyButton.setIcon(easyIcon);
+            }
+        });
+
         medButton.addActionListener(this);
+        medButton.addMouseListener(this);
+        medButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent mouseEvent) {
+                medButton.setIcon(medIconGlow);
+            }
+            @Override
+            public void mouseExited(MouseEvent mouseEvent){
+                medButton.setIcon(medIcon);
+            }
+        });
+
         hardButton.addActionListener(this);
+        hardButton.addMouseListener(this);
+        hardButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent mouseEvent) {
+                hardButton.setIcon(hardIconGlow);
+            }
+            @Override
+            public void mouseExited(MouseEvent mouseEvent){
+                hardButton.setIcon(hardIcon);
+            }
+        });
+
         backButton.addActionListener(this);
+        backButton.addMouseListener(this);
+        backButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent mouseEvent) {
+                backButton.setIcon(backIconGlow);
+            }
+            @Override
+            public void mouseExited(MouseEvent mouseEvent){
+                backButton.setIcon(backIcon);
+            }
+        });
+
 
         //Mute Button Listener
         muteButton.addActionListener(this);
 
         f.setVisible(true);
 
-        //Array that holds each tetris piece. slot 0 holds active piece,
-        //slot 1 holds next piece, slot 2 piece after that, etc
         pieces = new TetrisPiece[7];
         fillPieces();
     }
@@ -408,6 +526,7 @@ public class MainMenu extends JPanel implements ActionListener {
         }
     }
 
+
     public void actionPerformed(ActionEvent e) {
         if (e.getSource()!= startButton) {
             try {
@@ -416,17 +535,14 @@ public class MainMenu extends JPanel implements ActionListener {
                 ex.printStackTrace();
             }
         }
+
         if (e.getSource()== startButton){
-            /**PLACEHOLDER**/
+            /**FIXME PLACEHOLDER**/
             //Start game with assigned difficulty
-            //startGame(diffChoice)
             background.setIcon(null);
-            f.remove(title);
-            f.remove(startButton);
-            f.remove(diffButton);
-            f.remove(credButton);
-            f.remove(quitButton);
+            clearMainMenu();
             repaint();
+
             f.setContentPane(this);
             timer = new Timer(300, new GameCycle());
             timer.start();
@@ -444,17 +560,8 @@ public class MainMenu extends JPanel implements ActionListener {
 
         if (e.getSource()== diffButton){
             //Open Difficulty Menu
-
-            f.remove(background);
-            f.remove(startButton);
-            f.add(easyButton);
-            f.remove(diffButton);
-            f.add(medButton);
-            f.remove(credButton);
-            f.add(hardButton);
-            f.remove(quitButton);
-            f.add(backButton);
-            f.add(background);
+            clearMainMenu();
+            drawDiffMenu();
 
 
         }
@@ -464,7 +571,7 @@ public class MainMenu extends JPanel implements ActionListener {
             //Set Difficulty to Easy, or Value 1
             diffChoice = 1;
 
-            //This Code Changes the Background Image to Easy Mode Image
+            //This Code Changes the Background Image to East Mode Image
             bgImage = new ImageIcon("src/Resources/Images/vaporTrainTrimmed.gif");
             background.setIcon(bgImage);
             background.validate();
@@ -521,16 +628,8 @@ public class MainMenu extends JPanel implements ActionListener {
 
         if (e.getSource()== backButton){
             //Return to Main Menu
-            f.remove(background);
-            f.remove(easyButton);
-            f.add(startButton);
-            f.remove(medButton);
-            f.add(diffButton);
-            f.remove(hardButton);
-            f.add(credButton);
-            f.remove(backButton);
-            f.add(quitButton);
-            f.add(background);
+            clearDiffMenu();
+            drawMainMenu();
         }
 
         if (e.getSource()== credButton){
@@ -557,15 +656,6 @@ public class MainMenu extends JPanel implements ActionListener {
             }
         }
     }
-
-    /**FIXME**/
-    //Code to change buttons/make sounds when buttons are hovered over
-//    public void mouseEntered(MouseEvent m) throws IOException, UnsupportedAudioFileException {
-//        //Plays Noise when
-//        if (){
-//
-//        }
-//    }
 
     private class GameCycle implements ActionListener {
 
@@ -609,6 +699,70 @@ public class MainMenu extends JPanel implements ActionListener {
         }
     }
 
+    //Code to make icons glow and play sounds when buttons are hovered over
+    public void mouseEntered(MouseEvent m){
+        Component c = m.getComponent();
+        try {
+            menuMusic.playSound(6);
+        } catch (IOException | UnsupportedAudioFileException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent mouseEvent) {
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent mouseEvent) {
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent mouseEvent) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent mouseEvent) {
+
+    }
+
+    void clearMainMenu(){
+        f.remove(title);
+        f.remove(startButton);
+        f.remove(diffButton);
+        f.remove(credButton);
+        f.remove(quitButton);
+    }
+
+    void clearDiffMenu(){
+        f.remove(easyButton);
+        f.remove(medButton);
+        f.remove(hardButton);
+        f.remove(backButton);
+    }
+
+    void drawMainMenu(){
+        f.remove(background);
+        f.add(title);
+        f.add(startButton);
+        f.add(diffButton);
+        f.add(credButton);
+        f.add(quitButton);
+        f.add(background);
+    }
+
+    void drawDiffMenu(){
+        f.remove(background);
+        f.add(title);
+        f.add(easyButton);
+        f.add(medButton);
+        f.add(hardButton);
+        f.add(backButton);
+        f.add(background);
+    }
 
     public static void main(String args[]) throws IOException, UnsupportedAudioFileException {
         new MainMenu();
