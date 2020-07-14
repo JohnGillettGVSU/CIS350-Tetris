@@ -408,20 +408,6 @@ public class MainMenu extends JPanel implements ActionListener {
         }
     }
 
-    private void rotateLeft(){
-        if(pieces[0].getName().equals("squarePiece")){
-            return;
-        }
-        //do stuff to make piece rotate
-    }
-
-    private void rotateRight(){
-        if(pieces[0].getName().equals("squarePiece")){
-            return;
-        }
-        //do stuff to make piece rotate
-    }
-
     public void actionPerformed(ActionEvent e) {
         if (e.getSource()!= startButton) {
             try {
@@ -607,10 +593,10 @@ public class MainMenu extends JPanel implements ActionListener {
                 tryMoveDown();
             }
             else if(keycode == KeyEvent.VK_Z) {
-                rotateLeft();
+                pieces[0].rotateLeft(board);
             }
             else if(keycode == KeyEvent.VK_X) {
-                rotateRight();
+                pieces[0].rotateRight(board);
             }
             repaint();
         }
