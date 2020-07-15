@@ -1,43 +1,50 @@
-import javax.sound.sampled.*;
-
-import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
-
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
 
-public class Sound{
 
 
 
-    final JFXPanel fxPanel = new JFXPanel();
+public class Sound {
+
+
+    /****/
+    private final JFXPanel fxPanel = new JFXPanel();
 
 
     //Main Menu/Medium Mode Music
-    String menuMusic = ("src/Resources/Music/mainmenu.mp3");
-    Media menu = new Media(new File(menuMusic).toURI().toString());
+    /** Gives the file name and location of our main menu music.**/
+    private String menuMusic = ("src/Resources/Music/mainmenu.mp3");
+    /****/
+    private Media menu = new Media(new File(menuMusic).toURI().toString());
 
     //Easy Mode Music
-    String easyMusic = ("src/Resources/Music/easymode.mp3");
-    Media easy = new Media(new File(easyMusic).toURI().toString());
-
-    //Medium Mode Music
-//    String medMusic = ("src/Resources/Music/mediummode.mp3");
-//    Media medium = new Media(new File(medMusic).toURI().toString());
+    /****/
+    private String easyMusic = ("src/Resources/Music/easymode.mp3");
+    /****/
+    private Media easy = new Media(new File(easyMusic).toURI().toString());
 
     //Hard Mode Music
-    String hardMusic = ("src/Resources/Music/hardmode.mp3");
-    Media hard = new Media(new File(hardMusic).toURI().toString());
+    /****/
+    private String hardMusic = ("src/Resources/Music/hardmode.mp3");
+    /****/
+    private Media hard = new Media(new File(hardMusic).toURI().toString());
 
 
-    MediaPlayer mediaPlayer;
+    /****/
+    private MediaPlayer mediaPlayer;
 
     //private AudioInputStream audioStream;
-    void playSound(int num) throws IOException, UnsupportedAudioFileException {
+    /**@param num Accepts an integer used for a switch,
+     *which chooses which song or sound to play**/
+    void playSound(final int num) throws IOException, UnsupportedAudioFileException {
 
         Clip click = null;
         try {
@@ -48,6 +55,19 @@ public class Sound{
         try {
             assert click != null;
             click.open(AudioSystem.getAudioInputStream(new File("src/Resources/SFX/menuClick.wav")));
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
+        }
+
+        Clip mouse = null;
+        try {
+            mouse = AudioSystem.getClip();
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
+        }
+        try {
+            assert mouse != null;
+            mouse.open(AudioSystem.getAudioInputStream(new File("src/Resources/SFX/mouseover.wav")));
         } catch (LineUnavailableException e) {
             e.printStackTrace();
         }
@@ -66,7 +86,7 @@ public class Sound{
         }
 
         //Main Menu Status
-        switch (num){
+        switch (num) {
             case 1:
                 //Main Menu/Medium Mode Theme
                 mediaPlayer = new MediaPlayer(menu);
@@ -83,23 +103,27 @@ public class Sound{
                 mediaPlayer.play();
                 break;
             case 4:
-                try{
+                try {
                     click.start();
-                }catch(Exception e)
-                {
+                } catch (Exception e) {
                     e.printStackTrace(System.out);
                 }
                 break;
             case 5:
-                try{
+                try {
                     startBeep.start();
-                }catch(Exception e)
-                {
+                } catch (Exception e) {
+                    e.printStackTrace(System.out);
+                }
+            case 6:
+                try {
+                    mouse.start();
+                } catch (Exception e) {
                     e.printStackTrace(System.out);
                 }
                 break;
-
-
+            default:
+                break;
         }
         mediaPlayer.setOnEndOfMedia(new Runnable() {
             public void run() {
@@ -109,25 +133,22 @@ public class Sound{
         mediaPlayer.play();
     }
 
-
-    void stopSound(){
+    /****/
+    void stopSound() {
         mediaPlayer.stop();
     }
 
-    boolean getMuteStatus(){
+    /**@return Returns boolean value informing whether
+     * the media player is currently muted or not**/
+    boolean getMuteStatus() {
         return mediaPlayer.isMute();
     }
 
-    void volumeSlider(double num){
-        double temp = num * 0.01;
-        mediaPlayer.setVolume(temp);
-    }
-
-    void muteSound(){
-        if (!mediaPlayer.isMute()){
+    /****/
+    void muteSound() {
+        if (!mediaPlayer.isMute()) {
             mediaPlayer.setMute(true);
-        }
-        else if (mediaPlayer.isMute()){
+        } else if (mediaPlayer.isMute()) {
             mediaPlayer.setMute(false);
         }
     }
