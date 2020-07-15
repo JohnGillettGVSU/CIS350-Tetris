@@ -12,9 +12,18 @@ import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.util.Random;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.swing.*;
+import javax.swing.JPanel;
+import javax.swing.JFrame;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.Timer;
+import javax.swing.JOptionPane;
 
 /****/
+@SuppressWarnings("checkstyle:LineLength")
+
 public final class MainMenu extends JPanel implements ActionListener, MouseListener {
     /****/
     private JFrame f;
@@ -91,7 +100,6 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
     private Icon backIcon;
     /****/
     private Icon backIconGlow;
-
     /****/
     private JLabel background;
     /****/
@@ -497,21 +505,35 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         }
     }
 
-    private void checkEndGame(){
-        int curX, curY;
-        for(int i = 0; i <= 3; ++i) {
+    /**FIXME**/
+    private void checkEndGame() {
+        int curX;
+        int curY;
+        for (int i = 0; i <= 3; ++i) {
             curX = pieces[0].getPosition(i, 0);
             curY = pieces[0].getPosition(i, 1);
-            if (board[curX][curY]){
+            if (board[curX][curY]) {
                 gameOver();
                 return;
             }
         }
     }
 
-    private void gameOver(){
+    /**FIXME**/
+    private void gameOver() {
         JOptionPane.showMessageDialog(this, "Game over.");
         timer.stop();
+        f.removeAll();
+        f.dispose();
+        menuMusic.stopSound();
+
+        try {
+            new MainMenu();
+        } catch (UnsupportedAudioFileException | IOException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     /****/
@@ -669,20 +691,25 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
             switch (diffChoice) {
                 case 1:
                     timer = new Timer(1000, new GameCycle());
+                    break;
                 case 2:
                     timer = new Timer(750, new GameCycle());
+                    break;
                 case 3:
                     timer = new Timer(300, new GameCycle());
+                    break;
                 default:
-                    timer = new Timer(750, new GameCycle());
+                    break;
             }
 
             timer.start();
+            //setFocusable(true);
             scoreLabel = new JLabel();
             scoreLabel.setBounds(100,100,200,40);
             score = 0;
             scoreLabel.setText("Score: " + score);
             add(scoreLabel);
+
             linesLabel = new JLabel();
             linesLabel.setBounds(100,140,200,40);
             add(linesLabel);
@@ -697,6 +724,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
             } catch (IOException | UnsupportedAudioFileException ex) {
                 ex.printStackTrace();
             }
+
         }
 
         if (e.getSource() == diffButton) {
@@ -830,6 +858,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         }
     }
 
+    /****/
     private void nextCycle() {
         if (isFalling) {
             isFalling = false;
