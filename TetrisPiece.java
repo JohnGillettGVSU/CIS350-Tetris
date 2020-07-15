@@ -1,10 +1,15 @@
 public class TetrisPiece {
+    /****/
     private int[][] position;
+    /****/
     private String name;
+    /****/
     private int[][][] rotation;
+    /****/
     private int rotatedState;
 
-    public TetrisPiece(String name) {
+    /**@param name **/
+    public TetrisPiece(final String name) {
         this.name = name;
         position = new int[4][2];
         rotation = new int[4][4][2];
@@ -58,10 +63,10 @@ public class TetrisPiece {
             rotation[3][2][1] = 0;
             rotation[3][3][0] = -1;
             rotation[3][3][1] = -1;
-        }
+
         //square piece's starting position on the board will have each square
         //at position {(4, 19), (5, 19), (4, 18), (5, 18)}
-        else if (name.equals("squarePiece")) {
+        } else if (name.equals("squarePiece")) {
             position[0][0] = 4;
             position[0][1] = 19;
             position[1][0] = 5;
@@ -70,10 +75,9 @@ public class TetrisPiece {
             position[2][1] = 18;
             position[3][0] = 5;
             position[3][1] = 18;
-        }
         //T-shape piece's starting position on the board will have each square
         //at position {(4, 19), (3, 18), (4, 18), (5, 18)}
-        else if (name.equals("T_Piece")) {
+        } else if (name.equals("T_Piece")) {
             position[0][0] = 4;
             position[0][1] = 19;
             position[1][0] = 3;
@@ -119,10 +123,9 @@ public class TetrisPiece {
             rotation[3][2][1] = 0;
             rotation[3][3][0] = 1;
             rotation[3][3][1] = -1;
-        }
         //Z-shape piece's starting position on the board will have each square
         //at position {(5, 19), (4, 18), (5, 18), (4, 17)}
-        else if (name.equals("Z_Piece")) {
+        } else if (name.equals("Z_Piece")) {
             position[0][0] = 5;
             position[0][1] = 19;
             position[1][0] = 5;
@@ -168,10 +171,9 @@ public class TetrisPiece {
             rotation[3][2][1] = 1;
             rotation[3][3][0] = -1;
             rotation[3][3][1] = 0;
-        }
-        //S-shape piece's starting position on the board will have each square
-        //at position {(4, 19), (4, 18), (5, 18), (5, 17)}
-        else if (name.equals("S_Piece")) {
+            //S-shape piece's starting position on the board will have each square
+            //at position {(4, 19), (4, 18), (5, 18), (5, 17)}
+        } else if (name.equals("S_Piece")) {
             position[0][0] = 4;
             position[0][1] = 19;
             position[1][0] = 4;
@@ -217,10 +219,9 @@ public class TetrisPiece {
             rotation[3][2][1] = 1;
             rotation[3][3][0] = 2;
             rotation[3][3][1] = 0;
-        }
         //L-shape piece's starting position on the board will have each square
         //at position {(4, 19), (5, 19), (5, 18), (5, 17)}
-        else if (name.equals("L_Piece")) {
+        } else if (name.equals("L_Piece")) {
             position[0][0] = 4;
             position[0][1] = 19;
             position[1][0] = 4;
@@ -266,10 +267,9 @@ public class TetrisPiece {
             rotation[3][2][1] = -1;
             rotation[3][3][0] = 0;
             rotation[3][3][1] = -2;
-        }
         //mirrored L-shape piece's starting position on the board will have each square
         //at position {(4, 19), (5, 19), (4, 18), (4, 17)}
-        else if (name.equals("mirroredL_Piece")) {
+        } else if (name.equals("mirroredL_Piece")) {
             position[0][0] = 5;
             position[0][1] = 19;
             position[1][0] = 5;
@@ -318,26 +318,37 @@ public class TetrisPiece {
         }
     }
 
+    /**@return name **/
     public String getName() {
         return name;
     }
-    
-    public int getPosition(int x, int y){
+
+    /**
+     * @param x holds piece x position
+     * @param y holds piece y position
+     * @return position Returns the piece's current position**/
+    public int getPosition(final int x, final int y) {
         return position[x][y];
     }
 
-    public void setPosition(int x, int y, int pos){
+    /**
+     * @param x holds piece x position
+     * @param y holds piece y position
+     * @param pos is assigned the piece's x & y values for current position **/
+    public void setPosition(final int x, final int y, final int pos) {
         position[x][y] = pos;
     }
 
-    public void downOneLine(){
-        for(int i = 0; i <= 3; ++i){
+    /****/
+    public void downOneLine() {
+        for (int i = 0; i <= 3; ++i) {
             --position[i][1];
         }
     }
 
-    public void rotateRight(boolean board[][]){
-        if(name.equals("squarePiece")){
+    /**@param board fixme **/
+    public void rotateRight(final boolean[][] board) {
+        if (name.equals("squarePiece")) {
             return;
         }
 
@@ -345,34 +356,35 @@ public class TetrisPiece {
         int curX;
         int curY;
 
-        for(int i = 0; i <= 3; ++i) {
-            for(int j = 0; j <= 1; ++j) {
+        for (int i = 0; i <= 3; ++i) {
+            for (int j = 0; j <= 1; ++j) {
                 temp[i][j] = position[i][j];
             }
         }
-        for(int i = 0; i <= 3; ++i) {
+        for (int i = 0; i <= 3; ++i) {
             curX = temp[i][0] + rotation[rotatedState][i][0];
             curY = temp[i][1] + rotation[rotatedState][i][1];
-            if(curX < 0 || curX > 9 || curY < 0 || curY > 21){
+            if (curX < 0 || curX > 9 || curY < 0 || curY > 21) {
                 //stop trying to rotate piece if rotating it will place it out of the board
                 return;
             }
-            if(board[curX][curY]){
+            if (board[curX][curY]) {
                 //stop trying to rotate piece if it will intersect with another piece
                 return;
             }
         }
         //rotate piece after checking to make sure it can be rotated
-        for(int i = 0; i <= 3; ++i) {
-            for(int j = 0; j <= 1; ++j) {
+        for (int i = 0; i <= 3; ++i) {
+            for (int j = 0; j <= 1; ++j) {
                 position[i][j] += rotation[rotatedState][i][j];
             }
         }
         incrementRotatedState();
     }
 
-    public void rotateLeft(boolean[][] board){
-        if(name.equals("squarePiece")){
+    /**@param board fixme**/
+    public void rotateLeft(final boolean[][] board) {
+        if (name.equals("squarePiece")) {
             return;
         }
 
@@ -381,21 +393,21 @@ public class TetrisPiece {
         int curY;
 
         decrementRotatedState();
-        for(int i = 0; i <= 3; ++i) {
-            for(int j = 0; j <= 1; ++j) {
+        for (int i = 0; i <= 3; ++i) {
+            for (int j = 0; j <= 1; ++j) {
                 temp[i][j] = position[i][j];
             }
         }
-        for(int i = 0; i <= 3; ++i) {
+        for (int i = 0; i <= 3; ++i) {
             curX = temp[i][0] - rotation[rotatedState][i][0];
             curY = temp[i][1] - rotation[rotatedState][i][1];
-            if(curX < 0 || curX > 9 || curY < 0 || curY > 21){
+            if (curX < 0 || curX > 9 || curY < 0 || curY > 21) {
                 //stop trying to rotate piece if rotating it will place it out of the board
                 //also keep piece at same rotated state
                 incrementRotatedState();
                 return;
             }
-            if(board[curX][curY]){
+            if (board[curX][curY]) {
                 //stop trying to rotate piece if it will intersect with another piece
                 //also keep piece at same rotated state
                 incrementRotatedState();
@@ -403,20 +415,22 @@ public class TetrisPiece {
             }
         }
         //rotate piece after checking to make sure it can be rotated
-        for(int i = 0; i <= 3; ++i) {
-            for(int j = 0; j <= 1; ++j) {
+        for (int i = 0; i <= 3; ++i) {
+            for (int j = 0; j <= 1; ++j) {
                 position[i][j] -= rotation[rotatedState][i][j];
             }
         }
     }
 
-    public void incrementRotatedState(){
+    /****/
+    public void incrementRotatedState() {
         rotatedState = (rotatedState + 1) % 4;
     }
 
-    public void decrementRotatedState(){
+    /****/
+    public void decrementRotatedState() {
         --rotatedState;
-        if(rotatedState == -1){
+        if (rotatedState == -1) {
             rotatedState = 3;
         }
     }
