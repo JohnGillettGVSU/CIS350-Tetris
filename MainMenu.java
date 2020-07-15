@@ -12,13 +12,7 @@ import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.util.Random;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.swing.JPanel;
-import javax.swing.JFrame;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.Timer;
+import javax.swing.*;
 
 /****/
 public final class MainMenu extends JPanel implements ActionListener, MouseListener {
@@ -100,6 +94,14 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
 
     /****/
     private JLabel background;
+    /****/
+    private JLabel scoreLabel;
+    /****/
+    private JLabel linesLabel;
+    /****/
+    private int score;
+    /****/
+    private int lines;
 
     //Default Difficulty is Medium, or 2
     /****/
@@ -463,6 +465,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         }
         Random rand = new Random();
         createNewPiece(6);
+        checkEndGame();
     }
 
     /**@param i **/
@@ -492,6 +495,23 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         for (int i = 0; i <= 6; ++i) {
             createNewPiece(i);
         }
+    }
+
+    private void checkEndGame(){
+        int curX, curY;
+        for(int i = 0; i <= 3; ++i) {
+            curX = pieces[0].getPosition(i, 0);
+            curY = pieces[0].getPosition(i, 1);
+            if (board[curX][curY]){
+                gameOver();
+                return;
+            }
+        }
+    }
+
+    private void gameOver(){
+        JOptionPane.showMessageDialog(this, "Game over.");
+        timer.stop();
     }
 
     /****/
@@ -610,6 +630,10 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
             }
             if (clear) {
                 moveDown(y);
+                score += 10;
+                ++lines;
+                scoreLabel.setText("Score: " + score);
+                linesLabel.setText("Lines cleared: " + lines);
                 repaint();
             }
         }
@@ -654,7 +678,16 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
             }
 
             timer.start();
-            //setFocusable(true);
+            scoreLabel = new JLabel();
+            scoreLabel.setBounds(100,100,200,40);
+            score = 0;
+            scoreLabel.setText("Score: " + score);
+            add(scoreLabel);
+            linesLabel = new JLabel();
+            linesLabel.setBounds(100,140,200,40);
+            add(linesLabel);
+            lines = 0;
+            linesLabel.setText("Lines cleared: " + lines);
             addKeyListener(new TAdapter());
             requestFocus();
 
