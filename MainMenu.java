@@ -128,11 +128,11 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
 
     //flags
     /****/
-    private boolean isFalling = false;
+    private boolean isFalling = true;
 
     //board array
     /****/
-    private boolean[][] board;
+    private Square[][] board;
 
     /****/
     private static final int BOARD_WIDTH = 10;
@@ -278,7 +278,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         muteButton.setBorderPainted(false);
 
         pieces = new TetrisPiece[NUM_PIECES];
-        board = new boolean[BOARD_WIDTH][BOARD_HEIGHT];
+        board = new Square[BOARD_WIDTH][BOARD_HEIGHT];
         boardInit();
 
 
@@ -417,22 +417,26 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
     private void boardInit() {
         for (int x = 0; x <= 9; ++x) {
             for (int y = 0; y <= 21; y++) {
-                board[x][y] = false;
+                board[x][y] = new Square();
             }
         }
     }
 
     /****/
     private void updateBoard() {
+        int curX, curY;
         for (int i = 0; i <= 3; ++i) {
-            //set each square of the board where a piece lands to true
-            board[pieces[0].getPosition(i, 0)][pieces[0].getPosition(i, 1)] = true;
+            curX = pieces[0].getPosition(i, 0);
+            curY = pieces[0].getPosition(i, 1);
+            board[curX][curY].setFilled(true);  //set each square of board with a piece to true
+            board[curX][curY].setColor(pieces[0].getColor()); //remember which color each square is
         }
     }
 
     /**@param g **/
     public void paintComponent(final Graphics g) {
         super.paintComponent(g);
+        isFalling = true;
         drawTetrisGrid(g);
         drawPiece(g);
         clearLines();
@@ -452,14 +456,15 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
 
     /**@param g **/
     private void drawPiece(final Graphics g) {
-        g.setColor(Color.BLUE);
+        g.setColor(pieces[0].getColor());
         for (int i = 0; i <= 3; ++i) {
             g.fillRect(pieces[0].getPosition(i, 0) * 25 + 51,
                     600 - (pieces[0].getPosition(i, 1) * 25 + 64), 23, 23);
         }
         for (int x = 0; x <= 9; ++x) {
             for (int y = 0; y <= 21; y++) {
-                if (board[x][y]) {
+                if (board[x][y].isTrue()) {
+                    g.setColor(board[x][y].getColor());
                     g.fillRect(x * 25 + 51, 600 - (y * 25 + 64), 23, 23);
                 }
             }
@@ -512,7 +517,8 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         for (int i = 0; i <= 3; ++i) {
             curX = pieces[0].getPosition(i, 0);
             curY = pieces[0].getPosition(i, 1);
-            if (board[curX][curY]) {
+            if (board[curX][curY].isTrue()) {
+                repaint();
                 gameOver();
                 return;
             }
@@ -521,8 +527,8 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
 
     /**FIXME**/
     private void gameOver() {
-        JOptionPane.showMessageDialog(this, "Game over.");
         timer.stop();
+        JOptionPane.showMessageDialog(this, "Game over.");
         f.removeAll();
         f.dispose();
         menuMusic.stopSound();
@@ -543,7 +549,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         for (int i = 0; i <= 3; ++i) {
             curX = pieces[0].getPosition(i, 0);
             curY = pieces[0].getPosition(i, 1);
-            if (curY == 0 || board[curX][curY - 1]) {
+            if (curY == 0 || board[curX][curY - 1].isTrue()) {
                 updateBoard();
                 movePieces();
                 return;
@@ -569,7 +575,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         for (int x = 0; x <= 3; ++x) {
             curX = pieces[0].getPosition(x, 0);
             curY = pieces[0].getPosition(x, 1);
-            if (board[curX - 1][curY]) {
+            if (board[curX - 1][curY].isTrue()) {
                 return;
             }
         }
@@ -598,7 +604,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         for (int x = 0; x <= 3; ++x) {
             curX = pieces[0].getPosition(x, 0);
             curY = pieces[0].getPosition(x, 1);
-            if (board[curX + 1][curY]) {
+            if (board[curX + 1][curY].isTrue()) {
                 return;
             }
         }
@@ -611,7 +617,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
     }
 
     /****/
-    private void tryMoveDown() {
+    private boolean tryMoveDown() {
         int curX;
         int curY;
 
@@ -619,7 +625,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         for (int x = 0; x <= 3; ++x) {
             curY = pieces[0].getPosition(x, 1);
             if (curY == 0) {
-                return;
+                return false;
             }
         }
 
@@ -627,8 +633,8 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         for (int x = 0; x <= 3; ++x) {
             curX = pieces[0].getPosition(x, 0);
             curY = pieces[0].getPosition(x, 1);
-            if (board[curX][curY - 1]) {
-                return;
+            if (board[curX][curY - 1].isTrue()) {
+                return false;
             }
         }
 
@@ -637,6 +643,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
             curY = pieces[0].getPosition(x, 1);
             pieces[0].setPosition(x, 1, curY - 1);
         }
+        return true;
     }
 
     /****/
@@ -645,7 +652,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         for (int y = 21; y >= 0; --y) {
             clear = true;
             for (int x = 0; x <= 9; x++) {
-                if (!board[x][y]) {
+                if (!board[x][y].isTrue()) {
                     clear = false;
                     break;
                 }
@@ -668,6 +675,11 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
                 board[x][y] = board[x][y + 1];
             }
         }
+    }
+
+    /****/
+    private void moveBottom(){
+        while(tryMoveDown());
     }
 
     /**@param e **/
@@ -831,7 +843,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         @Override
         public void actionPerformed(final ActionEvent e) {
 
-            isFalling = true;
+           // isFalling = true;
             nextCycle();
             repaint();
         }
@@ -853,6 +865,8 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
                 pieces[0].rotateLeft(board);
             } else if (keycode == KeyEvent.VK_X) {
                 pieces[0].rotateRight(board);
+            } else if (keycode == KeyEvent.VK_C) {
+                moveBottom();
             }
             repaint();
         }
@@ -860,10 +874,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
 
     /****/
     private void nextCycle() {
-        if (isFalling) {
-            isFalling = false;
-            tryMovePieceDown();
-        }
+        tryMovePieceDown();
     }
 
     //Code to make icons glow and play sounds when buttons are hovered over
