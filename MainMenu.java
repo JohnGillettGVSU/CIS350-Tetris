@@ -103,6 +103,8 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
     /****/
     private JLabel background;
     /****/
+    private JLabel pieceImages;
+    /****/
     private JLabel scoreLabel;
     /****/
     private JLabel linesLabel;
@@ -114,6 +116,8 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
     //Default Difficulty is Medium, or 2
     /****/
     private int diffChoice = 2;
+    /****/
+    private int delay;
 
     //Array holding tetris pieces that are on the board or next in line
     /****/
@@ -192,6 +196,8 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         bgImage = new ImageIcon("src/Resources/Images/spacebackground.gif");
         background = new JLabel(bgImage);
         background.setBounds(0, 0, FRAME_WIDTH,  FRAME_HEIGHT);
+
+        pieceImages = new JLabel();
 
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -440,7 +446,6 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         drawTetrisGrid(g);
         drawPiece(g);
         clearLines();
-        //doDrawing(g);
     }
 
     /**@param g **/
@@ -478,6 +483,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         }
         Random rand = new Random();
         createNewPiece(6);
+        showNextPieces();
         checkEndGame();
     }
 
@@ -508,6 +514,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         for (int i = 0; i <= 6; ++i) {
             createNewPiece(i);
         }
+        showNextPieces();
     }
 
     /**FIXME**/
@@ -682,6 +689,37 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         while(tryMoveDown());
     }
 
+    /****/
+    private void showNextPieces(){
+        String filename = "src/Resources/Images/" + pieces[1].getName() + ".png";
+        Icon titleCard = new ImageIcon(filename);
+        pieceImages.setIcon(titleCard);
+        if(pieces[1].getName().equals("linePiece")) {
+            pieceImages.setBounds(300, 300, 27, 113);
+        }
+        else if(pieces[1].getName().equals("squarePiece")){
+            pieceImages.setBounds(300, 300, 55, 55);
+        }
+        else if(pieces[1].getName().equals("T_Piece")){
+            pieceImages.setBounds(300, 300, 84, 55);
+        }
+        else if(pieces[1].getName().equals("Z_Piece")){
+            pieceImages.setBounds(300, 300, 55, 82);
+        }
+        else if(pieces[1].getName().equals("S_Piece")){
+            pieceImages.setBounds(300, 300, 55, 82);
+        }
+        else if(pieces[1].getName().equals("L_Piece")){
+            pieceImages.setBounds(300, 300, 55, 83);
+        }
+        else if(pieces[1].getName().equals("mirroredL_Piece")){
+            pieceImages.setBounds(300, 300, 55, 84);
+        }
+        f.add(pieceImages);
+        //pieceImages.validate();
+        //pieceImages.repaint();
+    }
+
     /**@param e **/
     public void actionPerformed(final ActionEvent e) {
         if (e.getSource() != startButton) {
@@ -702,33 +740,34 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
             f.setContentPane(this);
             switch (diffChoice) {
                 case 1:
-                    timer = new Timer(1000, new GameCycle());
+                    delay = 1000;
                     break;
                 case 2:
-                    timer = new Timer(750, new GameCycle());
+                    delay = 750;
                     break;
                 case 3:
-                    timer = new Timer(300, new GameCycle());
+                    delay = 300;
                     break;
                 default:
                     break;
             }
-
+            timer = new Timer(delay, new GameCycle());
             timer.start();
-            //setFocusable(true);
+
             scoreLabel = new JLabel();
-            scoreLabel.setBounds(100,100,200,40);
+            //scoreLabel.setBounds(100,100,200,40);
             score = 0;
             scoreLabel.setText("Score: " + score);
             add(scoreLabel);
 
             linesLabel = new JLabel();
-            linesLabel.setBounds(100,140,200,40);
-            add(linesLabel);
+            //linesLabel.setBounds(100,140,200,40);
             lines = 0;
             linesLabel.setText("Lines cleared: " + lines);
+            add(linesLabel);
             addKeyListener(new TAdapter());
             requestFocus();
+            showNextPieces();
 
             try {
                 menuMusic.stopSound();
