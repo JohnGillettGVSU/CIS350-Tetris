@@ -85,6 +85,32 @@ public class Sound {
             e.printStackTrace();
         }
 
+        Clip block = null;
+        try {
+            block = AudioSystem.getClip();
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
+        }
+        try {
+            assert block != null;
+            block.open(AudioSystem.getAudioInputStream(new File("src/Resources/SFX/blockLand.wav")));
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
+        }
+
+        Clip line = null;
+        try {
+            line = AudioSystem.getClip();
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
+        }
+        try {
+            assert line != null;
+            line.open(AudioSystem.getAudioInputStream(new File("src/Resources/SFX/lineClear.wav")));
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
+        }
+
         //Main Menu Status
         switch (num) {
             case 1:
@@ -103,6 +129,7 @@ public class Sound {
                 mediaPlayer.play();
                 break;
             case 4:
+                //Menu Button Click
                 try {
                     click.start();
                 } catch (Exception e) {
@@ -110,18 +137,34 @@ public class Sound {
                 }
                 break;
             case 5:
+                //Start Button Beep
                 try {
                     startBeep.start();
                 } catch (Exception e) {
                     e.printStackTrace(System.out);
                 }
             case 6:
+                //Menu Hover Sound
                 try {
                     mouse.start();
                 } catch (Exception e) {
                     e.printStackTrace(System.out);
                 }
                 break;
+            case 7:
+                //Block Landing Click
+                try {
+                    block.start();
+                } catch (Exception e) {
+                    e.printStackTrace(System.out);
+                }
+            case 8:
+                //Line Clear Beep
+                try {
+                    line.start();
+                } catch (Exception e) {
+                    e.printStackTrace(System.out);
+                }
             default:
                 break;
         }
