@@ -116,16 +116,19 @@ public class Sound {
             case 1:
                 //Main Menu/Medium Mode Theme
                 mediaPlayer = new MediaPlayer(menu);
+                mediaPlayer.setVolume(0.3);
                 mediaPlayer.play();
                 break;
             case 2:
                 //Easy Mode Theme
                 mediaPlayer = new MediaPlayer(easy);
+                mediaPlayer.setVolume(0.3);
                 mediaPlayer.play();
                 break;
             case 3:
                 //Hard Mode Theme
                 mediaPlayer = new MediaPlayer(hard);
+                mediaPlayer.setVolume(0.3);
                 mediaPlayer.play();
                 break;
             case 4:
@@ -195,7 +198,6 @@ public class Sound {
             mediaPlayer.setMute(false);
         }
     }
-    
 
 
 }
