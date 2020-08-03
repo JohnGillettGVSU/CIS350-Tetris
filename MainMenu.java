@@ -1,4 +1,3 @@
-
 import java.awt.Component;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -12,18 +11,9 @@ import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.util.Random;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.swing.JPanel;
-import javax.swing.JFrame;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.Timer;
-import javax.swing.JOptionPane;
+import javax.swing.*;
 
 /****/
-@SuppressWarnings("checkstyle:LineLength")
-
 public final class MainMenu extends JPanel implements ActionListener, MouseListener {
     /****/
     private JFrame f;
@@ -31,6 +21,8 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
     private Sound menuMusic;
     /****/
     private JLabel title;
+    /****/
+    private JLabel credText;
 
     //Main Menu Buttons
     /****/
@@ -104,7 +96,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
     private JLabel background;
     /****/
     private JLabel[] pieceImages;   //changed pieceImages JLabel to be an array so it
-                                    //can hold up to 5 JLabels
+    //can hold up to 5 JLabels
     /****/
     private JLabel scoreLabel;
     /****/
@@ -131,9 +123,8 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
     /****/
     private Timer timer;
 
-    //flags
     /****/
-    private boolean isFalling = true;
+    private int timeCount;
 
     //board array
     /****/
@@ -193,14 +184,17 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         title = new JLabel(titleCard);
         title.setBounds(75, 0, TITLE_WIDTH, TITLE_HEIGHT);
 
+        Icon creditsText = new ImageIcon("src/Resources/Images/creditsText.png");
+        credText = new JLabel(creditsText);
+        credText.setBounds(0, 0, 400, 400);
+
         //JPanel Background
         bgImage = new ImageIcon("src/Resources/Images/spacebackground.gif");
         background = new JLabel(bgImage);
         background.setBounds(0, 0, FRAME_WIDTH,  FRAME_HEIGHT);
 
-        //added this to initialize pieceImages JLabel array
         pieceImages = new JLabel[5];
-        for(int i = 0; i <= 4; ++i){
+        for (int i = 0; i <= 4; ++i) {
             pieceImages[i] = new JLabel();
         }
 
@@ -435,7 +429,8 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
 
     /****/
     private void updateBoard() {
-        int curX, curY;
+        int curX;
+        int curY;
         for (int i = 0; i <= 3; ++i) {
             curX = pieces[0].getPosition(i, 0);
             curY = pieces[0].getPosition(i, 1);
@@ -447,13 +442,14 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
     /**@param g **/
     public void paintComponent(final Graphics g) {
         super.paintComponent(g);
-        isFalling = true;
         drawTetrisGrid(g);
         drawPiece(g);
-        clearLines();
-        showNextPieces();   //Added this to redraw each piece preview image to the screen
-                            //during every new cycle. for some reason this stops the piede
-                            //previews from appearing at the wrong spot when the game starts
+        try {
+            clearLines();
+        } catch (IOException | UnsupportedAudioFileException e) {
+            e.printStackTrace();
+        }
+        showNextPieces();
     }
 
     /**@param g **/
@@ -489,7 +485,6 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         for (int i = 0; i <= 5; ++i) {
             pieces[i] = pieces[i + 1];
         }
-        Random rand = new Random();
         createNewPiece(6);
         showNextPieces();
         checkEndGame();
@@ -522,10 +517,9 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         for (int i = 0; i <= 6; ++i) {
             createNewPiece(i);
         }
-        // I removed the showPieces() method call that was here
     }
 
-    /**FIXME**/
+    /****/
     private void checkEndGame() {
         int curX;
         int curY;
@@ -540,7 +534,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         }
     }
 
-    /**FIXME**/
+    /**Ends the playable game and returns the player to the main menu.**/
     private void gameOver() {
         timer.stop();
         JOptionPane.showMessageDialog(this, "Game over.");
@@ -553,7 +547,6 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         } catch (UnsupportedAudioFileException | IOException e) {
             e.printStackTrace();
         }
-
 
     }
 
@@ -631,7 +624,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         }
     }
 
-    /****/
+    /**@return tryMoveDown boolean status**/
     private boolean tryMoveDown() {
         int curX;
         int curY;
@@ -661,8 +654,8 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
         return true;
     }
 
-    /****/
-    private void clearLines() {
+    /** Method deletes lines cleared by players. **/
+    private void clearLines() throws IOException, UnsupportedAudioFileException {
         boolean clear;
         for (int y = 21; y >= 0; --y) {
             clear = true;
@@ -674,16 +667,16 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
             }
             if (clear) {
                 moveDown(y);
+                menuMusic.playSound(8);
                 score += 10;
                 ++lines;
                 scoreLabel.setText("Score: " + score);
                 linesLabel.setText("Lines cleared: " + lines);
+                repaint();
             }
         }
-        //added the setbounds methods into this method which forces the score and lines
-        //labels to appear in the correct spot
-        scoreLabel.setBounds(100,10,70,70);
-        linesLabel.setBounds(170,10,140,70);
+        scoreLabel.setBounds(100, 10, 70, 70);
+        linesLabel.setBounds(170, 10, 140, 70);
 
         repaint();
     }
@@ -692,29 +685,29 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
     private void moveDown(final int stop) {
         for (int y = stop; y < 21; ++y) {
             for (int x = 0; x <= 9; ++x) {
-                board[x][y] = board[x][y + 1];
+                board[x][y].setFilled(board[x][y + 1].isTrue());
+                board[x][y].setColor(board[x][y + 1].getColor());
             }
         }
     }
 
     /****/
-    private void moveBottom(){
-        while(tryMoveDown());
+    private void moveBottom() {
+        while (tryMoveDown());
     }
 
-    //added this whole method which previews 1, 3, or 5 pieces depending on difficulty
     /****/
-    private void showNextPieces(){
+    private void showNextPieces() {
         int piecesToShow = 7 - 2 * diffChoice;
         int y = 100;
-        for(int i = 1; i <= piecesToShow; ++i) {
+        for (int i = 1; i <= piecesToShow; ++i) {
             String filename = "src/Resources/Images/" + pieces[i].getName() + ".png";
             Icon titleCard = new ImageIcon(filename);
-            pieceImages[i-1].setIcon(titleCard);
-            pieceImages[i-1].setBounds(300, y, 70, 70);
-            f.add(pieceImages[i-1]);
-            pieceImages[i-1].validate();
-            pieceImages[i-1].repaint();
+            pieceImages[i - 1].setIcon(titleCard);
+            pieceImages[i - 1].setBounds(305,  y,  70,  70);
+            f.add(pieceImages[i - 1]);
+            pieceImages[i - 1].validate();
+            pieceImages[i - 1].repaint();
             y += 80;
         }
     }
@@ -728,14 +721,11 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
                 ex.printStackTrace();
             }
         }
-
         if (e.getSource() == startButton) {
-            //FIXME
             //Start game with assigned difficulty
             background.setIcon(null);
             clearMainMenu();
             repaint();
-
             f.setContentPane(this);
             switch (diffChoice) {
                 case 1:
@@ -752,13 +742,10 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
             }
             timer = new Timer(delay, new GameCycle());
             timer.start();
-
-            //moved this method call to before initialization of score and line labels
-            //this is also necessary for getting them in the correct spot
             showNextPieces();
 
             scoreLabel = new JLabel();
-            scoreLabel.setBounds(100,10,70,70);
+            scoreLabel.setBounds(100, 10, 70, 70);
             score = 0;
             scoreLabel.setText("Score: " + score);
             add(scoreLabel);
@@ -766,7 +753,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
             scoreLabel.repaint();
 
             linesLabel = new JLabel();
-            linesLabel.setBounds(170,10,140,70);
+            linesLabel.setBounds(170, 10, 140, 70);
             lines = 0;
             linesLabel.setText("Lines cleared: " + lines);
             add(linesLabel);
@@ -774,6 +761,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
             linesLabel.repaint();
             addKeyListener(new TAdapter());
             requestFocus();
+            showNextPieces();
 
             try {
                 menuMusic.stopSound();
@@ -783,19 +771,16 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
             }
 
         }
-
         if (e.getSource() == diffButton) {
             //Open Difficulty Menu
             clearMainMenu();
             drawDiffMenu();
         }
-
         if (e.getSource() == easyButton) {
-            //FIXME
             //Set Difficulty to Easy, or Value 1
             diffChoice = 1;
 
-            //This Code Changes the Background Image to East Mode Image
+//            This Code Changes the Background Image to Easy Mode Image
             bgImage = new ImageIcon("src/Resources/Images/vaporTrainTrimmed.gif");
             background.setIcon(bgImage);
             background.validate();
@@ -809,9 +794,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
                 ex.printStackTrace();
             }
         }
-
         if (e.getSource() == medButton) {
-            //FIXME
             //Set Difficulty to Medium, or Value 2
             diffChoice = 2;
 
@@ -829,9 +812,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
                 ex.printStackTrace();
             }
         }
-
         if (e.getSource() == hardButton) {
-            //FIXME
             //Set Difficulty to Hard, or Value 3
             diffChoice = 3;
 
@@ -849,27 +830,26 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
                 ex.printStackTrace();
             }
         }
-
         if (e.getSource() == backButton) {
             //Return to Main Menu
+            f.remove(credText);
             clearDiffMenu();
             drawMainMenu();
         }
-
         if (e.getSource() == credButton) {
             f.remove(background);
             f.remove(startButton);
             f.remove(diffButton);
             f.remove(credButton);
             f.remove(quitButton);
+            f.remove(title);
             f.add(backButton);
+            f.add(credText);
             f.add(background);
         }
-
         if (e.getSource() == quitButton) {
             System.exit(1);
         }
-
         if (e.getSource() == muteButton) {
             menuMusic.muteSound();
             if (menuMusic.getMuteStatus()) {
@@ -885,6 +865,7 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
 
         @Override
         public void actionPerformed(final ActionEvent e) {
+
             nextCycle();
             repaint();
         }
@@ -916,6 +897,28 @@ public final class MainMenu extends JPanel implements ActionListener, MouseListe
     /****/
     private void nextCycle() {
         tryMovePieceDown();
+        score++;
+        timeCount++;
+        scoreLabel.setText("Score: " + score);
+        scoreLabel.revalidate();
+        if (timeCount % 200 == 0) {
+            if (diffChoice == 1) {
+                timer.stop();
+                delay *= 0.95;
+                timer.setDelay(delay);
+                timer.start();
+            } else if (diffChoice == 2) {
+                timer.stop();
+                delay *= 0.9;
+                timer.setDelay(delay);
+                timer.start();
+            } else if (diffChoice == 3) {
+                timer.stop();
+                delay *= 0.8;
+                timer.setDelay(delay);
+                timer.start();
+            }
+        }
     }
 
     //Code to make icons glow and play sounds when buttons are hovered over
